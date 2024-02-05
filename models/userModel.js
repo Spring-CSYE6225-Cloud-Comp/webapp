@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('./databaseModel');
-const db = require('./databaseModel');
+// const { DataTypes } = require('sequelize');
+// const { sequelize } = require('./databaseModel');
+// const db = require('./databaseModel');
 module.exports = (sequelize, DataTypes)=>{
-    const User = sequelize.define('User', {
+    const User = sequelize.define('user', {
 
         id: {
             type: DataTypes.UUID,
@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes)=>{
         },
         email: {
             type: DataTypes.STRING,
-            unique: true,
             allowNull: false,
         },
         password: {
@@ -41,10 +40,12 @@ module.exports = (sequelize, DataTypes)=>{
             readOnly: true,
             defaultValue: DataTypes.NOW,
         },
+    },{
+        timestamps: false,
     });
     console.log("this is user in  userModel")
     console.log(User);
-    return User
+    return User;
 }
 
 
