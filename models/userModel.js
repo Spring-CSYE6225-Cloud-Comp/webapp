@@ -1,3 +1,4 @@
+
 // const { DataTypes } = require('sequelize');
 // const { sequelize } = require('./databaseModel');
 // const db = require('./databaseModel');
@@ -40,12 +41,14 @@ module.exports = (sequelize, DataTypes)=>{
             readOnly: true,
             defaultValue: DataTypes.NOW,
         },
+
     },{
         timestamps: false,
     });
     console.log("this is user in  userModel")
     console.log(User);
     return User;
+
 }
 
 

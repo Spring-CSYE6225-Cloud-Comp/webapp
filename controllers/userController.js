@@ -1,4 +1,5 @@
 const db = require('../models/databaseModel.js');
+
 const User = db.users;
 const bcrypt = require('bcrypt');
 
@@ -87,3 +88,4 @@ const createUser = async (req, res) => {
 };
 
 module.exports = { createUser }
+
