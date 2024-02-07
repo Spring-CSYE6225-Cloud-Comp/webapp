@@ -1,5 +1,4 @@
 const db = require('../models/databaseModel.js');
-
 const User = db.users;
 const bcrypt = require('bcrypt');
 
@@ -17,6 +16,44 @@ const checkFunc = async (email) => {
         return false;
     }
 };
+
+//authenticate user
+const authenticateUser = async(req, res)=>{
+
+    const head = req.headers.authorization;
+    //console.log(req.headers);
+
+    if(!head){
+        let err = new Error('User is not authorized');
+        //console.log(err);
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.status(401).send(err);
+    }
+
+    const auth = new Buffer.from(head.split(' ')[1], 'base64').toString().split(':');
+
+    const username = auth[0];
+    const pwd = auth[1];
+
+    const dummyUser = await User.findOne({where:{"email":username}});
+    if(!dummyUser){
+        console.log('User not found');
+        res.status(400).send('User not found');
+        return false;
+    }
+    const result = bcrypt.compareSync(pwd, dummyUser.password);
+
+    if(result){
+        console.log('Authentication Successful');
+        res.send('Authentication Successful');
+        return true;
+    }else{
+        console.log('Authentication failed');
+        res.status(401).send('Authentication failed');
+    }
+    
+
+}
 
 //new user creation
 const createUser = async (req, res) => {
@@ -57,13 +94,12 @@ const createUser = async (req, res) => {
                 }
             }
         
-        // console.log('not existing');
 
         //create new user
         const newUser = await User.create(info);
         console.log('user created')
         // await db.sequelize.sync();
-        
+
         //send to response
         res.status(201).json({
             id:newUser.id,
@@ -86,6 +122,88 @@ const createUser = async (req, res) => {
     }
     }
 };
+ //get self info
+const getUserInfo = async(req, res)=>{
+    const authhead = req.headers.authorization;
 
-module.exports = { createUser }
+    if(!authhead){
+        res.setHeader('WWW-Authenticate', 'Basic');
+        return res.status(401).send('User is not authorized');
+    }
 
+    const auth = new Buffer.from(authhead.split(' ')[1], 'base64').toString().split(':');
+
+    const username = auth[0];
+    const pwd = auth[1];
+
+    try{
+        const currUser = await User.findOne({where:{"email":username}});
+
+        if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
+            console.log('Authentication failed');
+            return res.status(401).send('Authentication failed');
+        }
+
+        const userInfo = {
+            id: currUser.id,
+            email: currUser.email,
+            firstName: currUser.firstName,
+            lastName: currUser.lastName,
+            account_created: currUser.account_created,
+            account_updated: currUser.account_updated
+        }
+        return res.status(200).json(userInfo);
+    }catch (error) {
+        console.error('Error while fetching user information:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+}
+
+//update info
+const updateUser = async(req, res)=>{
+    const authhead = req.headers.authorization;
+
+    if(!authhead){
+        res.setHeader('WWW-Authenticate', 'Basic');
+        return res.status(401).send('User is not authorized');
+    }
+
+    const auth = new Buffer.from(authhead.split(' ')[1], 'base64').toString().split(':');
+
+    const username = auth[0];
+    const pwd = auth[1];
+
+    try{
+        const currUser = await User.findOne({where:{"email":username}});
+
+        if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
+            console.log('Authentication failed');
+            return res.status(401).send('Authentication failed');
+        }
+
+        // const updatedInfo = {
+        //     firstName: req.body.firstName,
+        //     lastName: req.body.lastName,
+        //     newPassword: req.body.password
+        // }
+        const { firstName, lastName, newPassword } = req.body;
+
+        currUser.firstName = firstName;
+        currUser.lastName = lastName;
+
+        if (newPassword) {
+            currUser.password = bcrypt.hashSync(newPassword, 10);
+        }
+
+        currUser.account_updated = new Date();
+        await currUser.save();
+
+        return res.status(200).send('User account info updated successfully');
+    }catch(error){
+        console.error('Error while updating user account information:', error);
+        return res.status(500).send('error while updating user info');
+    }
+}
+
+module.exports = {createUser, getUserInfo, authenticateUser, updateUser}
