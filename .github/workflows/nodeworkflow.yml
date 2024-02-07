@@ -60,5 +60,5 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Start app
-        run: node app.js
+      - name: Run Integration Tests
+        run: npm test  

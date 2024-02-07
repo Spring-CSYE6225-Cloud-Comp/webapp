@@ -181,19 +181,22 @@ const updateUser = async(req, res)=>{
             console.log('Authentication failed');
             return res.status(401).send('Authentication failed');
         }
-
-        const updatedInfo = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            newPassword: bcrypt.hashSync(req.body.password, 10)
+        if(username!=req.body.email){
+            return res.status(400).send("'username and email don't match'")
         }
-        const { firstName, lastName, newPassword } = req.body;
+        // const updatedInfo = {
+        //     firstName: req.body.firstName,
+        //     lastName: req.body.lastName,
+        //     newPassword: bcrypt.hashSync(req.body.password, 10)
+        // }
+        const { firstName, lastName, password } = req.body;
 
         currUser.firstName = firstName;
         currUser.lastName = lastName;
 
-        if (newPassword) {
-            currUser.password = bcrypt.hashSync(newPassword, 10);
+        if (password) {
+            currUser.password = bcrypt.hashSync(password,10);
+            console.log(password);
         }
         currUser.account_updated = new Date();
         // User.update(updatedInfo, {
@@ -208,8 +211,8 @@ const updateUser = async(req, res)=>{
         // })
         
         await currUser.save();
-
-        return res.status(200).send('User account info updated successfully');
+        db.connect();
+        return res.status(204).send('');
     }catch(error){
         console.error('Error while updating user account information:', error);
         return res.status(503).send('');
