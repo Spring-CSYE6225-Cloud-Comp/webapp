@@ -118,7 +118,7 @@ const createUser = async (req, res) => {
     }else if(error.name == 'SequelizeValidationError'){ 
         res.status(400).json({ error: error.errors[0].message });
     }else{
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(503).json({ error: 'Service unavailable' });
     }
     }
 };
@@ -182,11 +182,11 @@ const updateUser = async(req, res)=>{
             return res.status(401).send('Authentication failed');
         }
 
-        // const updatedInfo = {
-        //     firstName: req.body.firstName,
-        //     lastName: req.body.lastName,
-        //     newPassword: req.body.password
-        // }
+        const updatedInfo = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            newPassword: bcrypt.hashSync(req.body.password, 10)
+        }
         const { firstName, lastName, newPassword } = req.body;
 
         currUser.firstName = firstName;
@@ -195,14 +195,24 @@ const updateUser = async(req, res)=>{
         if (newPassword) {
             currUser.password = bcrypt.hashSync(newPassword, 10);
         }
-
         currUser.account_updated = new Date();
+        // User.update(updatedInfo, {
+        //     where:{
+        //         email: username
+        //     }
+        // }).then(result=>{
+        //     res.status(204).send('User account updated successfully')
+        // }).catch(err=>{
+        //     console.log(err)
+        //     res.status(400).send('Bad request')
+        // })
+        
         await currUser.save();
 
         return res.status(200).send('User account info updated successfully');
     }catch(error){
         console.error('Error while updating user account information:', error);
-        return res.status(500).send('error while updating user info');
+        return res.status(503).send('');
     }
 }
 

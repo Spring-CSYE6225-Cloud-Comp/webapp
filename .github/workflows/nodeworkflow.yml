@@ -10,10 +10,47 @@ on:
 jobs:
   API-Check-NodeJS:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_ROOT_HOST: '%'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
+      - name: Initialize MYSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          sudo systemctl start mysql
+          sudo systemctl status mysql
+
+      - name: Initialize database
+        run: |
+          mysql -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_NAME }};"
+          echo "MySQL database '${{ secrets.DB_NAME }}' has been created/initialized."
+          echo "Inside following repo- '$(pwd)''"
+          
+      - name: Set up environment variables
+        run: |
+          echo "PORT=${{ secrets.PORT }}" > ${{ github.workspace }}/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> ${{ github.workspace }}/.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> ${{ github.workspace }}/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ${{ github.workspace }}/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> ${{ github.workspace }}/.env
+          echo "Contents of .env file:"
+          cat ${{ github.workspace }}/.env
+          echo "List files in the current directory:"
+          sudo ls -al
+          echo "List files in GitHub workspace:"
+          sudo ls -a ${{ github.workspace }}
+        shell: bash
 
       - name: Set up NodeJS
         uses: actions/setup-node@v2
