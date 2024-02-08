@@ -18,7 +18,7 @@ const healthCheck = async (req, res) => {
                     console.log(reqContentType)
                     console.log(contentType.parse(reqContentType).type)
                 
-                    res.status(400).send('');
+                    res.status(404).send('');
             //    return;
             }
             else{
