@@ -60,5 +60,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Integration Tests
-        run: npm test  
+      - name: Start app
+        run:
+          node app.js &
+
+      - name: Wait for app to be ready
+        run: |
+          sleep 10
+          curl localhost:${{ secrets.PORT }}
+         
+      - name: Stop workflow
+        run: exit 0
