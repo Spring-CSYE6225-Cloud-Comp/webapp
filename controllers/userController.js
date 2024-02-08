@@ -78,6 +78,10 @@ const createUser = async (req, res) => {
         // validations
             if(req.body.id){
                 throw new Error("Explicit 'id' field not allowed.")
+            }else if (typeof req.body.firstName !== 'string') {
+                return res.status(400).json({ error: 'Invalid type for firstname. It should be a string.' });
+            }else if (typeof req.body.lastName !== 'string') {
+                return res.status(400).json({ error: 'Invalid type for lastname. It should be a string.' });
             }
 
             const expectedParams = [
@@ -155,7 +159,7 @@ const getUserInfo = async(req, res)=>{
         return res.status(200).json(userInfo);
     }catch (error) {
         console.error('Error while fetching user information:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(503).json({ error: 'Service unavailable' });
     }
 
 }
@@ -189,6 +193,11 @@ const updateUser = async(req, res)=>{
         //     lastName: req.body.lastName,
         //     newPassword: bcrypt.hashSync(req.body.password, 10)
         // }
+        if (typeof req.body.firstName !== 'string') {
+            return res.status(400).json({ error: 'Invalid type for firstname. It should be a string.' });
+        }else if (typeof req.body.lastName !== 'string') {
+            return res.status(400).json({ error: 'Invalid type for lastname. It should be a string.' });
+        }
         const { firstName, lastName, password } = req.body;
 
         currUser.firstName = firstName;
