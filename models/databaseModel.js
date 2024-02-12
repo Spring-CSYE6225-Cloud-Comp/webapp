@@ -16,7 +16,7 @@ const connect = async() => {
     try {
       await sequelize.authenticate();
 
-      db.sequelize.sync({ force: false})
+      db.sequelize.sync({ force: false
   
     .then(() => {
   
