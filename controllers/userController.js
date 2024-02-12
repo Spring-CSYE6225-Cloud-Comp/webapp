@@ -228,4 +228,4 @@ const updateUser = async(req, res)=>{
     }
 }
 
-module.exports = {createUser, getUserInfo, authenticateUser, updateUser}
+module.exports  {createUser, getUserInfo, authenticateUser, updateUser}
