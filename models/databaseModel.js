@@ -18,7 +18,7 @@ const connect = async() => {
 
       db.sequelize.sync({ force: false})
   
-    .then(() => {
+    .then => {
   
       console.log('yes re-sync done!')
   
