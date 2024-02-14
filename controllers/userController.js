@@ -5,15 +5,18 @@ const bcrypt = require('bcrypt');
 //to check if user already exists
 const checkFunc = async (email) => {
     try {
+        await db.sequelize.sync();
+        console.log(email);
         const user = await User.findOne({
             where: {
                 email: email
             }
         });
-        return user !== null;
+        if(user!=null){
+        return true;}
     } catch (error) {
-       console.log('error in checkfunc');
-        return false;
+       console.log(error);
+    //     return false;
     }
 };
 
@@ -188,11 +191,6 @@ const updateUser = async(req, res)=>{
         if(username!=req.body.email){
             return res.status(400).send("'username and email don't match'")
         }
-        // const updatedInfo = {
-        //     firstName: req.body.firstName,
-        //     lastName: req.body.lastName,
-        //     newPassword: bcrypt.hashSync(req.body.password, 10)
-        // }
         if (typeof req.body.firstName !== 'string') {
             return res.status(400).json({ error: 'Invalid type for firstname. It should be a string.' });
         }else if (typeof req.body.lastName !== 'string') {
@@ -208,16 +206,6 @@ const updateUser = async(req, res)=>{
             console.log(password);
         }
         currUser.account_updated = new Date();
-        // User.update(updatedInfo, {
-        //     where:{
-        //         email: username
-        //     }
-        // }).then(result=>{
-        //     res.status(204).send('User account updated successfully')
-        // }).catch(err=>{
-        //     console.log(err)
-        //     res.status(400).send('Bad request')
-        // })
         
         await currUser.save();
         db.connect();
