@@ -1,4 +1,4 @@
-name: Node_unit_test
+name: Node_integration_test
 
 on:
 
@@ -8,7 +8,7 @@ on:
   # workflow_dispatch:
 
 jobs:
-  API-Check-NodeJS:
+  API-int-Test-NodeJS:
     runs-on: ubuntu-latest
     services:
       mysql:
