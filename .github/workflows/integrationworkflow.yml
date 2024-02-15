@@ -63,11 +63,5 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: |
-          npm run test:integration
-          exit_code=$?
-          if [ $exit_code -ne 0 ]; then
-            echo "Integration test failed."
-            exit  $exit_code
-          fi
+        run: npm run test:integration
           
