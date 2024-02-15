@@ -9,7 +9,7 @@
     "start": "nodemon app.js",
     "build": "node app.js"
   },
-  "keywords],
+  "keywords":[],
   "author": "",
   "license": "ISC",
   "dependencies": {
