@@ -5,7 +5,7 @@ on:
   pull_request_target:
     branches: 
       - main
-  # workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   API-int-Test-NodeJS:
