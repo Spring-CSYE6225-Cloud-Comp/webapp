@@ -95,8 +95,8 @@ describe('Account updation integration test',()=>{
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(info.email);
 
-    after(function () {
-      process.exit(0); // Use 0 for success, or any other value for failure
-    });
+    // after(function () {
+    //   process.exit(0); // Use 0 for success, or any other value for failure
+    // });
   })
 })
