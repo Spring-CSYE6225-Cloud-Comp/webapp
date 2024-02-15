@@ -25,19 +25,21 @@ const {expect} = chai;
 //TEST 1
 describe('Account creation and updation integration test',()=>{
 
-  after(function () {
-    if(testFailed){
-      process.exit(1);
-    }
-    process.exit(0); // Use 0 for success, or any other value for failure
-  });
+
+  // after(function () {
+  //   if(testFailed){
+  //     process.exit(1);
+  //   }
+  //   process.exit(0); // Use 0 for success, or any other value for failure
+  // });
 
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
-      firstName: "Test4",
+      firstName: "123",
       lastName: 'One',
       password: 'password',
-      email: 'test4@example.com'
+      email: 'test20@example.com'
+
     };
     console.log('trying to post')
     try{
@@ -59,10 +61,13 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount).to.have.status(200);
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(reqBody.email);
-    
-    if(!expect(getAccount).to.have.status(200)){
-      testFailed = true;
-    }
+
+    console.log("before post"+testFailed);
+    // if(!expect(getAccount).to.have.status(200)){
+    //   testFailed = true;
+    // }
+    console.log("aft post"+testFailed);
+
   });
    
   
@@ -72,7 +77,9 @@ describe('Account creation and updation integration test',()=>{
       firstName: 'NewFirstName',
       lastName: 'NewLastName',
       password: 'newPassword',
-      email: 'test4@example.com'
+
+      email: 'test20@example.com'
+
     };
     const oldPwd = 'password'
     const updated = {
@@ -104,9 +111,13 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount).to.have.status(200);
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(info.email);
-    if(!expect(getAccount).to.have.status(200)){
-      testFailed = true;
-    }
+
+    console.log("before put"+testFailed);
+    // if(!expect(getAccount).to.have.status(200)){
+    //   testFailed = true;
+    // }
+    console.log("aft put"+testFailed);
+
   });
     
 });
