@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test:unit": "mocha test/unit",
-    "test:integration": "mocha test/integration",
+    "test:integration": "mocha --recursive --exit test/integration",
     "start": "nodemon app.js",
     "build": "node app.js"
   },
