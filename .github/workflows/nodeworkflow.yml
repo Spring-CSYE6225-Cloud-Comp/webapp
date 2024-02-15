@@ -52,6 +52,9 @@ jobs:
           sudo ls -a ${{ github.workspace }}
         shell: bash
 
+      - name: Check package.json syntax
+        run: jsonlint package.json
+        
       - name: Set up NodeJS
         uses: actions/setup-node@v2
         with:
