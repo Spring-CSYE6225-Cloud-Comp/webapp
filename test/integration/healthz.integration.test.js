@@ -6,7 +6,6 @@ const {createUser} = require('../../controllers/userController.js')
 
 chai.use(chaiHttp);
 const {expect} = chai;
-
 //TEST 0
 // describe('/healthz endpoint', () => {
 //   it('should return status 200 and "OK" for GET request', async() => {
