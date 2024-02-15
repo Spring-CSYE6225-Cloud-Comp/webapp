@@ -53,11 +53,10 @@ describe('Account creation integration test',()=>{
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(reqBody.email);
     done();
+  });
     after(function (done) {
       process.exit(0); // Use 0 for success, or any other value for failure
     });
-   
-  });
 });
 
 //TEST 2
@@ -100,8 +99,8 @@ describe('Account updation integration test',()=>{
     expect(getAccount.body.email).to.equal(info.email);
 
     done();
+  });
     after(function (done) {
       process.exit(0); // Use 0 for success, or any other value for failure
     });
-  })
 })
