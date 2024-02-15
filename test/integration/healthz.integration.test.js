@@ -3,7 +3,6 @@ const chaiHttp = require('chai-http');
 const app = require('../../app.js');
 const {createUser} = require('../../controllers/userController.js')
 
-
 chai.use(chaiHttp);
 const {expect} = chai;
 //TEST 0
