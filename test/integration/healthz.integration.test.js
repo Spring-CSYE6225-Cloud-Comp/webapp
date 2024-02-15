@@ -3,7 +3,7 @@ const chaiHttp = require('chai-http');
 const app = require('../../app.js');
 const {createUser} = require('../../controllers/userController.js')
 
-
+let testFailed = false;
 chai.use(chaiHttp);
 const {expect} = chai;
 
@@ -26,15 +26,18 @@ const {expect} = chai;
 describe('Account creation and updation integration test',()=>{
 
   after(function () {
+    if(testFailed){
+      process.exit(1);
+    }
     process.exit(0); // Use 0 for success, or any other value for failure
   });
 
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
-      firstName: "Test1",
+      firstName: "Test4",
       lastName: 'One',
       password: 'password',
-      email: 'test1@example.com'
+      email: 'test4@example.com'
     };
     console.log('trying to post')
     try{
@@ -57,6 +60,9 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(reqBody.email);
     
+    if(!expect(getAccount).to.have.status(200)){
+      testFailed = true;
+    }
   });
    
   
@@ -66,7 +72,7 @@ describe('Account creation and updation integration test',()=>{
       firstName: 'NewFirstName',
       lastName: 'NewLastName',
       password: 'newPassword',
-      email: 'test1@example.com'
+      email: 'test4@example.com'
     };
     const oldPwd = 'password'
     const updated = {
@@ -85,6 +91,9 @@ describe('Account creation and updation integration test',()=>{
     .send(info);
 
     expect(updateAccount).to.have.status(204);
+    // if(!expect(getAccount).to.have.status(204)){
+    //   testFailed = true;
+    // }
     }catch(error){
       console.log(error); 
     }
@@ -95,7 +104,9 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount).to.have.status(200);
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(info.email);
-
+    if(!expect(getAccount).to.have.status(200)){
+      testFailed = true;
+    }
   });
     
 });
