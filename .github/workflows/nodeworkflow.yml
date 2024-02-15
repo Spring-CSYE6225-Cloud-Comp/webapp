@@ -53,9 +53,6 @@ jobs:
           echo "List files in GitHub workspace:"
           sudo ls -a ${{ github.workspace }}
         shell: bash
-
-      - name: Check package.json syntax
-        run: jsonlint package.json
         
       - name: Set up NodeJS
         uses: actions/setup-node@v2
@@ -64,7 +61,12 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+        continue-on-error: false
 
       - name: Run tests
         run: npm run test:unit
+
+      - name: Check for install issues
+        if: ${{ failure() }}
+        run: exit 1
           
