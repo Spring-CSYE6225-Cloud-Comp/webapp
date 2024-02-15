@@ -27,7 +27,7 @@ describe('Account creation integration test',()=>{
 
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
-      firstName: 'Test',
+      firstName: 123,
       lastName: 'One',
       password: 'password',
       email: 'test@example.com'
