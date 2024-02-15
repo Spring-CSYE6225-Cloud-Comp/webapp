@@ -25,6 +25,7 @@ const {expect} = chai;
 //TEST 1
 describe('Account creation and updation integration test',()=>{
 
+
   // after(function () {
   //   if(testFailed){
   //     process.exit(1);
@@ -38,6 +39,7 @@ describe('Account creation and updation integration test',()=>{
       lastName: 'One',
       password: 'password',
       email: 'test20@example.com'
+
     };
     console.log('trying to post')
     try{
@@ -59,11 +61,13 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount).to.have.status(200);
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(reqBody.email);
+
     console.log("before post"+testFailed);
     // if(!expect(getAccount).to.have.status(200)){
     //   testFailed = true;
     // }
     console.log("aft post"+testFailed);
+
   });
    
   
@@ -73,7 +77,9 @@ describe('Account creation and updation integration test',()=>{
       firstName: 'NewFirstName',
       lastName: 'NewLastName',
       password: 'newPassword',
+
       email: 'test20@example.com'
+
     };
     const oldPwd = 'password'
     const updated = {
@@ -105,11 +111,13 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount).to.have.status(200);
     expect(getAccount.body).to.have.property('id');
     expect(getAccount.body.email).to.equal(info.email);
+
     console.log("before put"+testFailed);
     // if(!expect(getAccount).to.have.status(200)){
     //   testFailed = true;
     // }
     console.log("aft put"+testFailed);
+
   });
     
 });
