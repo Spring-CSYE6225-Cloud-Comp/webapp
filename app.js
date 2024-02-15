@@ -2,7 +2,7 @@ const express = require('express');
 const allRoutes = require('./routes/allRoutes.js');
 const db = require ('./models/databaseModel.js')
 
-const app = express);
+const app = express();
 const PORT = 8080;
 
 app.use(express.json());
