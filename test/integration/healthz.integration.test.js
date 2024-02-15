@@ -53,7 +53,7 @@ describe('Account creation integration test',()=>{
     done();
   });
     after(function (done) {
-      process.exit(0); // Use 0 for success, or any other value for failure
+      process.exit(1); // Use 0 for success, or any other value for failure
     });
 });
 
@@ -99,6 +99,6 @@ describe('Account updation integration test',()=>{
     done();
   });
     after(function (done) {
-      process.exit(0); // Use 0 for success, or any other value for failure
+      process.exit(1); // Use 0 for success, or any other value for failure
     });
 })
