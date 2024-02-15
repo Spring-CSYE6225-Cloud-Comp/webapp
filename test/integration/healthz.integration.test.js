@@ -23,14 +23,18 @@ const {expect} = chai;
 // });
 
 //TEST 1
-describe('Account creation integration test',()=>{
+describe('Account creation and updation integration test',()=>{
+
+  after(function () {
+    process.exit(0); // Use 0 for success, or any other value for failure
+  });
 
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
-      firstName: "Test",
+      firstName: "Test1",
       lastName: 'One',
       password: 'password',
-      email: 'test@example.com'
+      email: 'test1@example.com'
     };
     console.log('trying to post')
     try{
@@ -54,13 +58,7 @@ describe('Account creation integration test',()=>{
     expect(getAccount.body.email).to.equal(reqBody.email);
     
   });
-    after(function () {
-      process.exit(0); // Use 0 for success, or any other value for failure
-    });
-});
-
-//TEST 2
-describe('Account updation integration test',()=>{
+   
   
   it('Update the account and using the GET call, validate the account was updated', async()=>{
 
@@ -68,7 +66,7 @@ describe('Account updation integration test',()=>{
       firstName: 'NewFirstName',
       lastName: 'NewLastName',
       password: 'newPassword',
-      email: 'test@example.com'
+      email: 'test1@example.com'
     };
     const oldPwd = 'password'
     const updated = {
@@ -99,7 +97,5 @@ describe('Account updation integration test',()=>{
     expect(getAccount.body.email).to.equal(info.email);
 
   });
-    after(function () {
-      process.exit(0); // Use 0 for success, or any other value for failure
-    });
-})
+    
+});
