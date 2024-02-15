@@ -60,6 +60,18 @@ const authenticateUser = async(req, res)=>{
 
 //new user creation
 const createUser = async (req, res) => {
+    const expectedParams = [
+        'email',
+        'password', 
+        'firstName',
+        'lastName'
+    ];
+    // additional validations
+    for (const param of expectedParams) {
+        if (!req.body[param]) {
+            return res.status(404).json({ error: `Missing field: ${param}` });
+        }
+    }
     const hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
     //store info from request body
@@ -87,12 +99,7 @@ const createUser = async (req, res) => {
                 return res.status(400).json({ error: 'Invalid type for lastname. It should be a string.' });
             }
 
-            const expectedParams = [
-                'email',
-                'password', 
-                'firstName',
-                'lastName'
-            ];
+            
 
             for (const key of Object.keys(req.body)) {
                 if (!expectedParams.includes(key)) {
@@ -100,7 +107,7 @@ const createUser = async (req, res) => {
                     res.status()
                 }
             }
-        
+            
 
         //create new user
         const newUser = await User.create(info);
