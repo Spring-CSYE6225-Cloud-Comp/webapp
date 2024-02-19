@@ -35,7 +35,7 @@ describe('Account creation and updation integration test',()=>{
 
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
-      firstName: 123,
+      firstName: "123",
       lastName: 'One',
       password: 'password',
       email: 'test20@example.com'
@@ -121,3 +121,4 @@ describe('Account creation and updation integration test',()=>{
   });
     
 });
+//test_comment
