@@ -1,0 +1,53 @@
+
+name: Build Image with Packer
+
+on:
+  pull_request:
+    branches:
+     - main
+    types: [closed]
+  # workflow_dispatch
+ 
+
+jobs:
+  Image-Packer:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up environment variables
+        run: |
+          echo "PORT=${{ secrets.PORT }}" > ${{ github.workspace }}/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> ${{ github.workspace }}/.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> ${{ github.workspace }}/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ${{ github.workspace }}/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> ${{ github.workspace }}/.env
+          echo "Contents of .env file:"
+          cat ${{ github.workspace }}/.env
+
+      - name: Create Zip Archive
+        run: |
+          zip -r Neha_Shende_002783740_04.zip ./
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+
+
+      - name: Build AMI
+        run: |
+          packer init gcp-centos.pkr.hcl
+          packer fmt gcp-centos.pkr.hcl
+          packer validate gcp-centos.pkr.hcl
+          packer build gcp-centos.pkr.hcl
