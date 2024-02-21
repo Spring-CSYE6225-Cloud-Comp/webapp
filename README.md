@@ -6,3 +6,4 @@
 - Inside package.json Change start: “nodemon app.js“
 
 # steps for packer
+- packer init
