@@ -81,6 +81,10 @@ sudo yum install -y unzip
 # Remove Git
 sudo yum remove git -y
 
+# Set up MySQL database
+mysql -u "$DB_USER" -p"$DB_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS '$DB_NAME';"
+echo "MySQL database '$DB_NAME' has been created (if it didn't exist)."
+
 # Add group 
 sudo groupadd csye6225
 sudo useradd -s /sbin/nologin -g csye6225 -d /opt/csye6225 -m csye6225
@@ -92,9 +96,14 @@ sudo mkdir -p /opt/csye6225/Neha_Shende_002783740_04
 
 sudo unzip /tmp/Neha_Shende_002783740_04 -d /opt/csye6225/Neha_Shende_002783740_04/
 cd /opt/csye6225/Neha_Shende_002783740_04
-sudo yum install nodejs npm -y
-sudo npm install --unsafe-perm
-echo "Dependencies installed"
+echo "Installing project dependencies..."
+npm install
+npm uninstall mysql2
+npm install mysql2@3.0.0
+echo "Project dependencies have been installed."
+# sudo yum install nodejs npm -y
+# sudo npm install --unsafe-perm
+# echo "Dependencies installed"
 
 # Change ownership 
 sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_04
@@ -103,7 +112,7 @@ sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_04
 sudo chmod -R 755 /opt/csye6225/Neha_Shende_002783740_04
 
 # Copy service file
-sudo cp /opt/csye6225/Neha_Shende_002783740_04/databaseEnv.service /etc/systemd/system/
+sudo cp /opt/csye6225/Neha_Shende_002783740_04/DBservice.service /etc/systemd/system/
 
 # Enable and start the service
 sudo systemctl enable gcpSys
