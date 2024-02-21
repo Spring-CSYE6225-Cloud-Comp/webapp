@@ -51,10 +51,10 @@
 # node app.js
 
 # Install mariadb
-yum install mariadb-server -y
-systemctl start mariadb
-systemctl enable mariadb
-mysql_secure_instalation <<EOF
+sudo yum install -y mariadb mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation <<EOF
 
 y
 root
