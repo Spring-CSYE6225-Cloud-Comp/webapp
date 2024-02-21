@@ -1,6 +1,5 @@
 # webapp
 
-
 # steps to follow after unzipping folder
 - npm init
 - Npm install mysql2 express bcrypt sequelize nodemon dotenv
