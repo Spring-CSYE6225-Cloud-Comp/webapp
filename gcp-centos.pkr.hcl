@@ -14,7 +14,7 @@ variable "project_id" {
 
 variable "source_image" {
   type    = string
-  default = "centos-stream-8-webapp"
+  default = "base-img"
 }
 
 variable "ssh_username" {
