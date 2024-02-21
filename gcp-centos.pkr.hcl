@@ -36,11 +36,16 @@ build {
 
   provisioner "file" {
     source = "Neha_Shende_002783740_04.zip"
-    destination = "~/Neha_Shende_002783740_04"
+    destination = "/tmp/Neha_Shende_002783740_04"
   }
 
   provisioner "shell" {
+    environment_vars = [
+      "CHECKPOINT_DISABLE=1"
+    ]
     script = "setupCentOS.sh"
+    expect_disconnect = true
+    valid_exit_codes = [0, 2300218]
   }
 
 }
