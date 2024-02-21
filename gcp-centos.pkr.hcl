@@ -35,7 +35,7 @@ build {
   sources = ["source.googlecompute.centos_stream8"]
 
   provisioner "file" {
-    source = "Neha_Shende_002783740_04.zip"
+    source      = "Neha_Shende_002783740_04.zip"
     destination = "/tmp/Neha_Shende_002783740_04"
   }
 
@@ -43,9 +43,9 @@ build {
     environment_vars = [
       "CHECKPOINT_DISABLE=1"
     ]
-    script = "setupCentOS.sh"
+    script            = "setupCentOS.sh"
     expect_disconnect = true
-    valid_exit_codes = [0, 2300218]
+    valid_exit_codes  = [0, 2300218]
   }
 
 }
