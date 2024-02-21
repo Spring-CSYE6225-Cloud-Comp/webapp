@@ -82,7 +82,7 @@ sudo yum install -y unzip
 sudo yum remove git -y
 
 # Set up MySQL database
-mysql -u "root" -p"root" -e "CREATE DATABASE IF NOT EXISTS 'db1';"
+mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS 'db1';"
 echo "MySQL database 'db1' has been created (if it didn't exist)."
 
 # Add group 
