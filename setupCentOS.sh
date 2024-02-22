@@ -66,7 +66,7 @@ y
 EOF
 
 #Launch MYSQL
-mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
+sudo mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
 
 # Update package lists and upgrade installed packages
 sudo yum update -y
@@ -82,22 +82,28 @@ sudo yum install -y unzip
 sudo yum remove git -y
 
 # Set up MySQL database
-mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS 'db1';"
+mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS db1;"
 echo "MySQL database 'db1' has been created (if it didn't exist)."
 
 # Add group 
 sudo groupadd csye6225
-sudo useradd -s /sbin/nologin -g csye6225 -d /opt/csye6225 -m csye6225
+sudo useradd -s /usr/sbin/nologin -g csye6225 -d /opt/csye6225 -m csye6225
 
 # Unzip the file to the destination directory
 echo "I'm in $(pwd) directory"
 dir
 sudo mkdir -p /opt/csye6225/Neha_Shende_002783740_04
+sudo su
+whoami
+# Set permissions
+sudo chmod -R 757 /opt/csye6225
 
 sudo unzip /tmp/Neha_Shende_002783740_04 -d /opt/csye6225/Neha_Shende_002783740_04/
+sleep 5
+
 cd /opt/csye6225/Neha_Shende_002783740_04
 echo "Installing project dependencies..."
-npm install
+npm install /opt/csye6225/Neha_Shende_002783740_04/package.json
 npm uninstall mysql2
 npm install mysql2@3.0.0
 echo "Project dependencies have been installed."
@@ -109,14 +115,14 @@ echo "Project dependencies have been installed."
 sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_04
 
 # Set permissions
-sudo chmod -R 755 /opt/csye6225/Neha_Shende_002783740_04
+# sudo chmod -R 755 /opt/csye6225/Neha_Shende_002783740_04
 
 # Copy service file
 sudo cp /opt/csye6225/Neha_Shende_002783740_04/DBservice.service /etc/systemd/system/
 
 # Enable and start the service
-sudo systemctl enable gcpSys
-sudo systemctl start gcpSys
+sudo systemctl enable DBservice
+sudo systemctl start DBservice
 
 # Clean package cache
 sudo yum clean all
