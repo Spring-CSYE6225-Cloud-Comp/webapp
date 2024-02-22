@@ -42,6 +42,10 @@ jobs:
           echo "Contents of .env file:"
           cat ${{ github.workspace }}/.env
 
+      - name: Create Zip Archive
+        run: |
+          zip -r Neha_Shende_002783740_04.zip ./
+
       - name: Set up NodeJS
         uses: actions/setup-node@v2
         with:
@@ -52,10 +56,6 @@ jobs:
 
       - name: Run tests
         run: npm run test:integration
-
-      - name: Create Zip Archive
-        run: |
-          zip -r Neha_Shende_002783740_04.zip ./
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
