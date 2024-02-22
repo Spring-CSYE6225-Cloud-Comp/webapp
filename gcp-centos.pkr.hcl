@@ -48,4 +48,9 @@ build {
     valid_exit_codes  = [0, 2300218]
   }
 
+  provisioner "shell" {
+    inline = [
+      "echo 'admin:cloud' | sudo chpasswd"
+    ]
+  }
 }
