@@ -7,3 +7,4 @@
 
 # steps for packer
 - packer init
+- packer fmt .
