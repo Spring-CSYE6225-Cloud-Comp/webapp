@@ -8,3 +8,4 @@
 # steps for packer
 - packer init
 - packer fmt .
+- packer plan
