@@ -51,22 +51,22 @@
 # node app.js
 
 # Install mariadb
-sudo yum install -y mariadb mariadb-server
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-sudo mysql_secure_installation <<EOF
+# sudo yum install -y mariadb mariadb-server
+# sudo systemctl start mariadb
+# sudo systemctl enable mariadb
+# sudo mysql_secure_installation <<EOF
 
-y
-root
-root
-y
-y
-y
-y
-EOF
+# y
+# root
+# root
+# y
+# y
+# y
+# y
+# EOF
 
-#Launch MYSQL
-sudo mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
+# #Launch MYSQL
+# sudo mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
 
 # Update package lists and upgrade installed packages
 sudo yum update -y
@@ -82,8 +82,8 @@ sudo yum install -y unzip
 sudo yum remove git -y
 
 # Set up MySQL database
-mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS db1;"
-echo "MySQL database 'db1' has been created (if it didn't exist)."
+# mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS db1;"
+# echo "MySQL database 'db1' has been created (if it didn't exist)."
 
 # Add group 
 sudo groupadd csye6225
