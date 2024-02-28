@@ -35,8 +35,8 @@ build {
   sources = ["source.googlecompute.centos_stream8"]
 
   provisioner "file" {
-    source      = "Neha_Shende_002783740_04.zip"
-    destination = "/tmp/Neha_Shende_002783740_04"
+    source      = "Neha_Shende_002783740_05.zip"
+    destination = "/tmp/Neha_Shende_002783740_05"
   }
 
   provisioner "shell" {
