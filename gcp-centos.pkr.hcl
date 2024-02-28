@@ -9,12 +9,12 @@ packer {
 
 variable "project_id" {
   type    = string
-  default = "spring6225-dev"
+  default = "spring6225-dev-1"
 }
 
 variable "source_image" {
   type    = string
-  default = "base-img"
+  default = "image-1"
 }
 
 variable "ssh_username" {
