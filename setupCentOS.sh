@@ -51,22 +51,22 @@
 # node app.js
 
 # Install mariadb
-sudo yum install -y mariadb mariadb-server
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-sudo mysql_secure_installation <<EOF
+# sudo yum install -y mariadb mariadb-server
+# sudo systemctl start mariadb
+# sudo systemctl enable mariadb
+# sudo mysql_secure_installation <<EOF
 
-y
-root
-root
-y
-y
-y
-y
-EOF
+# y
+# root
+# root
+# y
+# y
+# y
+# y
+# EOF
 
-#Launch MYSQL
-sudo mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
+# #Launch MYSQL
+# sudo mysql -u root -p"root" --execute="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
 
 # Update package lists and upgrade installed packages
 sudo yum update -y
@@ -82,8 +82,8 @@ sudo yum install -y unzip
 sudo yum remove git -y
 
 # Set up MySQL database
-mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS db1;"
-echo "MySQL database 'db1' has been created (if it didn't exist)."
+# mysql -u root -p"root" -e "CREATE DATABASE IF NOT EXISTS db1;"
+# echo "MySQL database 'db1' has been created (if it didn't exist)."
 
 # Add group 
 sudo groupadd csye6225
@@ -92,18 +92,18 @@ sudo useradd -s /usr/sbin/nologin -g csye6225 -d /opt/csye6225 -m csye6225
 # Unzip the file to the destination directory
 echo "I'm in $(pwd) directory"
 dir
-sudo mkdir -p /opt/csye6225/Neha_Shende_002783740_04
+sudo mkdir -p /opt/csye6225/Neha_Shende_002783740_05
 sudo su
 whoami
 # Set permissions
 sudo chmod -R 757 /opt/csye6225
 
-sudo unzip /tmp/Neha_Shende_002783740_04 -d /opt/csye6225/Neha_Shende_002783740_04/
+sudo unzip /tmp/Neha_Shende_002783740_05 -d /opt/csye6225/Neha_Shende_002783740_05/
 sleep 5
 
-cd /opt/csye6225/Neha_Shende_002783740_04
+cd /opt/csye6225/Neha_Shende_002783740_05
 echo "Installing project dependencies..."
-npm install /opt/csye6225/Neha_Shende_002783740_04/package.json
+npm install /opt/csye6225/Neha_Shende_002783740_05/package.json
 npm uninstall mysql2
 npm install mysql2@3.0.0
 echo "Project dependencies have been installed."
@@ -112,13 +112,13 @@ echo "Project dependencies have been installed."
 # echo "Dependencies installed"
 
 # Change ownership 
-sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_04
+sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_05
 
 # Set permissions
 # sudo chmod -R 755 /opt/csye6225/Neha_Shende_002783740_04
 
 # Copy service file
-sudo cp /opt/csye6225/Neha_Shende_002783740_04/DBservice.service /etc/systemd/system/
+sudo cp /opt/csye6225/Neha_Shende_002783740_05/DBservice.service /etc/systemd/system/
 
 # Enable and start the service
 sudo systemctl enable DBservice

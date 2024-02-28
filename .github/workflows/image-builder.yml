@@ -19,6 +19,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Create Zip Archive
+        run: |
+          zip -r Neha_Shende_002783740_05.zip ./
+
       - name: Initialize MYSQL
         run: |
           sudo apt-get update
@@ -41,10 +45,6 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> ${{ github.workspace }}/.env
           echo "Contents of .env file:"
           cat ${{ github.workspace }}/.env
-
-      - name: Create Zip Archive
-        run: |
-          zip -r Neha_Shende_002783740_04.zip ./
 
       - name: Set up NodeJS
         uses: actions/setup-node@v2
