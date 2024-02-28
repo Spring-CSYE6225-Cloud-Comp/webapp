@@ -5,6 +5,6 @@
 - Npm install mysql2 express bcrypt sequelize nodemon dotenv
 - Inside package.json Change start: “nodemon app.js“
 
-# steps for packer
+# steps for hcl packer
 - packer init
 - packer fmt .
