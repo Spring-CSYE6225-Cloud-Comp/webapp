@@ -121,8 +121,8 @@ sudo chown -R csye6225:csye6225 /opt/csye6225/Neha_Shende_002783740_05
 sudo cp /opt/csye6225/Neha_Shende_002783740_05/DBservice.service /etc/systemd/system/
 
 # Enable and start the service
-sudo systemctl enable DBservice
-sudo systemctl start DBservice
+# sudo systemctl enable DBservice
+# sudo systemctl start DBservice
 
 # Clean package cache
 sudo yum clean all
