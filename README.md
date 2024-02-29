@@ -8,3 +8,4 @@
 # steps for hcl packer
 - packer init
 - packer fmt .
+- packer validate
