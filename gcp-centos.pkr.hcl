@@ -22,11 +22,16 @@ variable "ssh_username" {
   default = "admin"
 }
 
+variable "zone" {
+  type    = string
+  default = "us-east1-b"
+}
+
 source "googlecompute" "centos_stream8" {
   project_id   = var.project_id
   source_image = var.source_image
   ssh_username = var.ssh_username
-  zone         = "us-east1-b"
+  zone         = var.zone
   disk_size    = "100"
   image_name   = "centos-stream8-{{timestamp}}"
 }
