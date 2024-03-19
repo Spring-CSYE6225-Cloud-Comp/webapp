@@ -54,6 +54,15 @@ build {
   }
 
   provisioner "shell" {
+    environment_vars = [
+      "CHECKPOINT_DISABLE=1"
+    ]
+    script            = "gcloud_ops_agent.sh"
+    expect_disconnect = true
+    valid_exit_codes  = [0, 2300218]
+  }
+
+  provisioner "shell" {
     inline = [
       "echo 'admin:cloud' | sudo chpasswd"
     ]

@@ -1,6 +1,7 @@
 const db = require('../models/databaseModel.js');
 const User = db.users;
 const bcrypt = require('bcrypt');
+const lg = require('../logger.js')
 
 //to check if user already exists
 const checkFunc = async (email) => {
@@ -31,6 +32,7 @@ const authenticateUser = async(req, res)=>{
         //console.log(err);
         res.setHeader('WWW-Authenticate', 'Basic');
         res.status(401).send(err);
+        lg.error('User is not authorized. Check if headers are missing');
     }
 
     const auth = new Buffer.from(head.split(' ')[1], 'base64').toString().split(':');
@@ -42,6 +44,7 @@ const authenticateUser = async(req, res)=>{
     if(!dummyUser){
         console.log('User not found');
         res.status(400).send('User not found');
+        lg.error('User not found');
         return false;
     }
     const result = bcrypt.compareSync(pwd, dummyUser.password);
@@ -53,6 +56,7 @@ const authenticateUser = async(req, res)=>{
     }else{
         console.log('Authentication failed');
         res.status(401).send('Authentication failed');
+        lg.error('Authentication failed');
     }
     
 
@@ -69,6 +73,7 @@ const createUser = async (req, res) => {
     // additional validations
     for (const param of expectedParams) {
         if (!req.body[param]) {
+            lg.error('Field missing');
             return res.status(404).json({ error: `Missing field: ${param}` });
         }
     }
@@ -87,6 +92,7 @@ const createUser = async (req, res) => {
         //check if user exists by calling check function
         const existingUser = await checkFunc(req.body.email);
         if (existingUser) {
+            lg.error('Existing user');
             return res.status(400).json({ error: 'User with this email already exists' });
         }
 
@@ -115,6 +121,7 @@ const createUser = async (req, res) => {
         // await db.sequelize.sync();
 
         //send to response
+        lg.info('User created successfully');
         res.status(201).json({
             id:newUser.id,
             first_name:newUser.firstName,
@@ -126,12 +133,16 @@ const createUser = async (req, res) => {
         // console.log(newUser);
     } catch (error) {
         if (error.message === "Explicit 'id' field not allowed."){
+            lg.error('Explicit id field not allowed');
             res.status(400).json({ error: error.message });
     }else if (error.message.startsWith('Invalid field: ')) {
+        lg.error('Invalid field');
         res.status(400).json({ error: error.message });
     }else if(error.name == 'SequelizeValidationError'){ 
+        lg.error('Sequelize Validation Error');
         res.status(400).json({ error: error.errors[0].message });
     }else{
+        lg.error('Service unavailable');
         res.status(503).json({ error: 'Service unavailable' });
     }
     }
@@ -142,6 +153,7 @@ const getUserInfo = async(req, res)=>{
 
     if(!authhead){
         res.setHeader('WWW-Authenticate', 'Basic');
+        lg.error('User is not authorized. Check if headers are missing');
         return res.status(401).send('User is not authorized');
     }
 
@@ -155,6 +167,7 @@ const getUserInfo = async(req, res)=>{
 
         if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
             console.log('Authentication failed');
+            lg.error('Authentication failed');
             return res.status(401).send('Authentication failed');
         }
 
@@ -166,9 +179,11 @@ const getUserInfo = async(req, res)=>{
             account_created: currUser.account_created,
             account_updated: currUser.account_updated
         }
+        lg.info('User retrieved successfully')
         return res.status(200).json(userInfo);
     }catch (error) {
         console.error('Error while fetching user information:', error);
+        lg.error('Service unavailable');
         return res.status(503).json({ error: 'Service unavailable' });
     }
 
@@ -180,6 +195,7 @@ const updateUser = async(req, res)=>{
 
     if(!authhead){
         res.setHeader('WWW-Authenticate', 'Basic');
+        lg.error('User is not authorized. Check if headers are missing');
         return res.status(401).send('User is not authorized');
     }
 
@@ -192,15 +208,19 @@ const updateUser = async(req, res)=>{
         const currUser = await User.findOne({where:{"email":username}});
 
         if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
+            lg.error('User Authentication failed');
             console.log('Authentication failed');
             return res.status(401).send('Authentication failed');
         }
         if(username!=req.body.email){
+            lg.error('Username and email dont match');
             return res.status(400).send("'username and email don't match'")
         }
         if (typeof req.body.firstName !== 'string') {
+            lg.error('Firstname should be a string');
             return res.status(400).json({ error: 'Invalid type for firstname. It should be a string.' });
         }else if (typeof req.body.lastName !== 'string') {
+            lg.error('Lastname should be a string');
             return res.status(400).json({ error: 'Invalid type for lastname. It should be a string.' });
         }
         const { firstName, lastName, password } = req.body;
@@ -216,9 +236,11 @@ const updateUser = async(req, res)=>{
         
         await currUser.save();
         db.connect();
+        lg.info('User updated successfully');
         return res.status(204).send('');
     }catch(error){
         console.error('Error while updating user account information:', error);
+        lg.error('Error while updating user');
         return res.status(503).send('');
     }
 }
