@@ -4,10 +4,10 @@
 #curl -sSO https://dl.google.com/cloudagents/add-logging-agent-repo.sh
 curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
 sudo bash add-google-cloud-ops-agent-repo.sh --also-install
-sudo bash add-logging-agent-repo.sh --also-install
-sudo service google-fluentd start
-sudo service google-fluentd status  
-sudo systemctl status google-cloud-ops-agent"*"# Verify the status of the Ops Agent
+# sudo bash add-logging-agent-repo.sh --also-install
+# sudo service google-fluentd start
+# sudo service google-fluentd status  
+# sudo systemctl status google-cloud-ops-agent"*"# Verify the status of the Ops Agent
 
 # Configure Ops Agent for application logs
 #!/bin/bash
@@ -18,7 +18,7 @@ logging:
     my-app-receiver:
       type: files
       include_paths:
-        - var/log/csye6225.log
+        - /opt/csye6225/Neha_Shende_002783740_05/var/log/*.log
       record_log_file_path: true
   processors:
     my-app-processor:
@@ -31,3 +31,5 @@ logging:
         receivers: [my-app-receiver]
         processors: [my-app-processor]
 EOF
+
+sudo systemctl restart google-cloud-ops-agent
