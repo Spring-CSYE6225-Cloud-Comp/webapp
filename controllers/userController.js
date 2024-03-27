@@ -2,6 +2,35 @@ const db = require('../models/databaseModel.js');
 const User = db.users;
 const bcrypt = require('bcrypt');
 const lg = require('../logger.js')
+const moment = require('moment');
+const uuid = require('uuid');
+const { PubSub } = require('@google-cloud/pubsub');
+const { query } = require('express');
+
+const pubsub = new PubSub();
+
+// Publish message to verify_email topic
+const publishMessage = async (data) => {
+    try {
+      const topicName = process.env.PUBSUB_VERIFY_EMAIL_TOPIC
+      const dataBuffer = Buffer.from(JSON.stringify(data));
+  
+      await pubsub.topic(topicName).publish(dataBuffer);
+      console.log('Message published to verify_email topic:', data);
+    } catch (error) {
+      console.error('Error publishing message:', error);
+    }
+  };
+
+//to generate random token
+function generateToken() {
+    return uuid.v4();
+  }
+
+// to add minutes to a date
+function addMinutes(date, minutes) {
+    return moment(date).add(minutes, 'minutes').toDate();
+  }
 
 //to check if user already exists
 const checkFunc = async (email) => {
@@ -79,12 +108,20 @@ const createUser = async (req, res) => {
     }
     const hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
+    const { token } = req.query;
+    let topicMessage = {
+        email: req.body.email,
+        token: token
+    }
+    lg.debug('The topic message is', topicMessage);
     //store info from request body
     let info ={
         email:req.body.email,
         password:hashedPassword,
         firstName:req.body.firstName,
-        lastName:req.body.lastName
+        lastName:req.body.lastName,
+        token: generateToken(),
+        expiry: addMinutes(new Date(), 2) //added 2 minutes to expire
     }
 
 
@@ -117,18 +154,21 @@ const createUser = async (req, res) => {
 
         //create new user
         const newUser = await User.create(info);
-        console.log('user created')
+        console.log('user info inserted in db')
+        
+        await publishMessage(topicMessage);
         // await db.sequelize.sync();
 
         //send to response
         lg.info('User created successfully');
         res.status(201).json({
-            id:newUser.id,
-            first_name:newUser.firstName,
-            last_name:newUser.lastName,
-            username:newUser.email,
-            account_created:newUser.account_created,
-            account_updated:newUser.account_updated
+            // id:newUser.id,
+            // first_name:newUser.firstName,
+            // last_name:newUser.lastName,
+            // username:newUser.email,
+            // account_created:newUser.account_created,
+            // account_updated:newUser.account_updated
+            Info: 'User verification pending'
     });
         // console.log(newUser);
     } catch (error) {
@@ -163,8 +203,16 @@ const getUserInfo = async(req, res)=>{
     const pwd = auth[1];
 
     try{
+
+
         const currUser = await User.findOne({where:{"email":username}});
 
+          // Check if the status field in the user table is set to "verified"
+        if(!currUser.status == 'verified' || currUser.status == null){
+            lg.error('User verification failed');
+            return res.status(400).json({ error: 'User verification failed' });
+        }
+  
         if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
             console.log('Authentication failed');
             lg.error('Authentication failed');
@@ -207,6 +255,12 @@ const updateUser = async(req, res)=>{
     try{
         const currUser = await User.findOne({where:{"email":username}});
 
+        // Check if the status field in the user table is set to "verified"
+        if(!currUser.status == 'verified'){
+            lg.error('User verification failed');
+            return res.status(400).json({ error: 'User verification failed' });
+        }
+
         if(!currUser || !bcrypt.compareSync(pwd, currUser.password)){
             lg.error('User Authentication failed');
             console.log('Authentication failed');
@@ -245,4 +299,37 @@ const updateUser = async(req, res)=>{
     }
 }
 
-module.exports = {createUser, getUserInfo, authenticateUser, updateUser}
+//endpoint for token verification
+const verifyToken = async (req, res) => {
+    const { token } = req.query;
+  console.log('token=',token)
+    try {
+      const user = await User.findOne({
+        where: {
+          token: token
+        }
+      });
+      console.log('user is', user)
+      if (!user) {
+        lg.error('Token not found');
+        return res.status(404).json({ error: 'Token not found' });
+      }
+      
+      const currentTime = new Date();
+        if (user.expiry && currentTime > user.expiry) {
+            lg.error('Token has expired');
+            return res.status(400).json({ error: 'Token has expired' });
+        }
+
+      // Set status as verified
+      user.status = 'verified';
+      await user.save();
+  
+      lg.info('User verified successfully');
+      res.status(200).json({ message: 'User verified successfully' });
+    } catch (error) {
+      res.status(400).json({ error: error});
+    }
+  }
+
+module.exports = {createUser, getUserInfo, authenticateUser, updateUser, verifyToken}
