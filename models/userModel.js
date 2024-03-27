@@ -43,6 +43,18 @@ module.exports = (sequelize, DataTypes)=>{
             readOnly: true,
             defaultValue: DataTypes.NOW,
         },
+        token: {
+            type: DataTypes.UUID,
+            allowNull: true
+        },
+        expiry: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: true
+        }
     },{
         timestamps: false,
     });
