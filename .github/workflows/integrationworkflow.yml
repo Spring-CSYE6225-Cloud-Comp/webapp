@@ -46,6 +46,7 @@ jobs:
           echo "DB_USER=${{ secrets.DB_USER }}" >> ${{ github.workspace }}/.env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ${{ github.workspace }}/.env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> ${{ github.workspace }}/.env
+          echo "PUBSUB_VERIFY_EMAIL_TOPIC='verify_email'" >> ${{ github.workspace }}/.env
           echo "Contents of .env file:"
           cat ${{ github.workspace }}/.env
           echo "List files in the current directory:"
