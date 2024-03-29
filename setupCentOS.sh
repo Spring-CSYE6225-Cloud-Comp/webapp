@@ -73,7 +73,9 @@ sudo yum update -y
 sudo yum upgrade -y
 
 # Install Node.js and npm
-sudo yum install -y nodejs npm
+# sudo yum remove -y nodejs npm
+curl -sL https://rpm.nodesource.com/setup_16.x | sudo bash -
+sudo yum install -y nodejs
 
 # Install unzip
 sudo yum install -y unzip

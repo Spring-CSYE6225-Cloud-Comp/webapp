@@ -12,11 +12,11 @@ const pubsub = new PubSub();
 // Publish message to verify_email topic
 const publishMessage = async (data) => {
     try {
-      const topicName = process.env.PUBSUB_VERIFY_EMAIL_TOPIC
+      const topicName = "verify_email"
       const dataBuffer = Buffer.from(JSON.stringify(data));
   
-      await pubsub.topic(topicName).publish(dataBuffer);
-      console.log('Message published to verify_email topic:', data);
+      const msgID = await pubsub.topic(topicName).publish(dataBuffer);
+      console.log('Message published to verify_email topic:', dataBuffer);
     } catch (error) {
       console.error('Error publishing message:', error);
     }
@@ -108,12 +108,6 @@ const createUser = async (req, res) => {
     }
     const hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
-    const { token } = req.query;
-    let topicMessage = {
-        email: req.body.email,
-        token: token
-    }
-    lg.debug('The topic message is', topicMessage);
     //store info from request body
     let info ={
         email:req.body.email,
@@ -124,6 +118,12 @@ const createUser = async (req, res) => {
         expiry: addMinutes(new Date(), 2) //added 2 minutes to expire
     }
 
+    let topicMessage = {
+        email: req.body.email,
+        token: info.token
+    }
+    console.log('topic msg is:', topicMessage);
+    lg.debug('The topic message is', topicMessage);
 
     try {
         //check if user exists by calling check function
@@ -155,11 +155,8 @@ const createUser = async (req, res) => {
         //create new user
         const newUser = await User.create(info);
         console.log('user info inserted in db')
-        
-        await publishMessage(topicMessage);
-        // await db.sequelize.sync();
+        console.log('topic msg to be published is:',topicMessage);
 
-        //send to response
         lg.info('User created successfully');
         res.status(201).json({
             // id:newUser.id,
@@ -169,7 +166,14 @@ const createUser = async (req, res) => {
             // account_created:newUser.account_created,
             // account_updated:newUser.account_updated
             Info: 'User verification pending'
-    });
+        });
+        const msgBuffer = await publishMessage(topicMessage);
+        console.log('contents of msgBuffer:',msgBuffer)
+        //await publishMessage(topicMessage);
+        // await db.sequelize.sync();
+
+        //send to response
+        
         // console.log(newUser);
     } catch (error) {
         if (error.message === "Explicit 'id' field not allowed."){
