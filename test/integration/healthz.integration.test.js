@@ -1,7 +1,8 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../../app.js');
-const {createUser} = require('../../controllers/userController.js')
+const db = require('../../models/databaseModel.js');
+const User = db.users;
 
 let testFailed = false;
 chai.use(chaiHttp);
@@ -25,20 +26,12 @@ const {expect} = chai;
 //TEST 1
 describe('Account creation and updation integration test',()=>{
 
-
-  // after(function () {
-  //   if(testFailed){
-  //     process.exit(1);
-  //   }
-  //   process.exit(0); // Use 0 for success, or any other value for failure
-  // });
-
   it('Create an account, and using the GET call, validate account exists', async()=>{
     const reqBody = {
       firstName: "123",
       lastName: 'One',
       password: 'password',
-      email: 'test20@example.com'
+      email: 'test20@example.com',
 
     };
     console.log('trying to post')
@@ -49,11 +42,27 @@ describe('Account creation and updation integration test',()=>{
       console.log('after post')
       //console.log(createAccount);
       expect(createAccount).to.have.status('201');
-  
+      //verificationToken = createAccount.body.info.token;
+
+      console.log(createAccount.body);
+      // expect(verificationToken).to.exist;
+
+
     }catch(error){
       console.log(error);
     }
-   
+
+    const currUser = await User.findOne({where:{"email":reqBody.email}});
+    const verifyToken = currUser.token;
+
+    console.log('token=',verifyToken);
+
+    const verifyEmailRes = await chai.request(app)
+    .get(`/v1/user/verify?token=${verifyToken}`);
+
+    expect(verifyEmailRes).to.have.status(200);
+
+    console.log('verification successful');
     const getAccount = await chai.request(app)
     .get('/v1/user/self')
     .set('Authorization',`Basic ${Buffer.from(`${reqBody.email}:${reqBody.password}`).toString('base64')}`);
@@ -63,9 +72,7 @@ describe('Account creation and updation integration test',()=>{
     expect(getAccount.body.email).to.equal(reqBody.email);
 
     console.log("before post"+testFailed);
-    // if(!expect(getAccount).to.have.status(200)){
-    //   testFailed = true;
-    // }
+
     console.log("aft post"+testFailed);
 
   });
