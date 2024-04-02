@@ -119,7 +119,7 @@ const createUser = async (req, res) => {
     }
 
     let topicMessage = {
-        email: req.body.email,
+        email: info.email,
         token: info.token
     }
     console.log('topic msg is:', topicMessage);
