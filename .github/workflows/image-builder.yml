@@ -76,3 +76,38 @@ jobs:
           packer fmt gcp-centos.pkr.hcl
           packer validate gcp-centos.pkr.hcl
           packer build gcp-centos.pkr.hcl
+
+      - name: Create new Instance Template with latest machine image
+        run: |
+          IMAGE_ID=$(packer build gcp-centos.pkr.hcl | grep -oE 'gce-sources: .*/images/(.*)-')
+          gcloud compute instance-templates create-with-new-machine-image my-instance-template \
+            --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
+            --metadata-from-file startup-script=setupCentOS.sh
+
+      - name: Update Managed Instance Group with new Instance Template
+        run: |
+          gcloud compute instance-groups managed update my-managed-group \
+            --instance-template=my-instance-template \
+            --region=${{ secrets.GCP_REGION }}
+
+      - name: Start Rolling Update for Managed Instance Group
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update my-managed-group \
+            --region=${{ secrets.GCP_REGION }} \
+            --max-unavailable=2 \
+            --min-ready=2
+
+      - name: Wait for Rolling Update to Complete
+        run: |
+          while true; do
+            STATUS=$(gcloud compute instance-groups managed describe my-managed-group \
+              --region=${{ secrets.GCP_REGION }} \
+              --format="get(status.statefulPercentComplete)")
+            if [ "$STATUS" == "100" ]; then
+              echo "Rolling update completed successfully."
+              break
+            else
+              echo "Rolling update in progress: $STATUS%"
+              sleep 30
+            fi
+          done
