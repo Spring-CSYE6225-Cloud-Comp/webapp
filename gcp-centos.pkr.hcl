@@ -67,4 +67,9 @@ build {
       "echo 'admin:cloud' | sudo chpasswd"
     ]
   }
+
+  post-processor "manifest" {
+    output     = "manifest.json"
+    strip_path = true
+  }
 }
