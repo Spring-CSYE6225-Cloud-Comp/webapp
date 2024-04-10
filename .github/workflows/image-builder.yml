@@ -72,10 +72,10 @@ jobs:
 
       - name: Build AMI
         run: |
-          packer init gcp-packer.pkr.hcl
-          packer fmt gcp-packer.pkr.hcl
-          packer validate gcp-packer.pkr.hcl
-          packer build -force gcp-packer.pkr.hcl
+          packer init gcp-centos.pkr.hcl
+          packer fmt gcp-centos.pkr.hcl
+          packer validate gcp-centos.pkr.hcl
+          packer build -force gcp-centos.pkr.hcl
           echo "Contents of manifest.json:"
           cat manifest.json
           IMAGE_ID=$(jq '.builds[0].artifact_id' manifest.json)
