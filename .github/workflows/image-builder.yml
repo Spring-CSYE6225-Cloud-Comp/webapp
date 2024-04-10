@@ -78,7 +78,7 @@ jobs:
           packer build -force gcp-centos.pkr.hcl
           echo "Contents of manifest.json:"
           cat manifest.json
-          IMAGE_ID=$(jq '.builds[0].artifact_id' manifest.json)
+          IMAGE_ID=$(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
           echo "IMAGE_ID is"
           echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_OUTPUT
           echo $(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
@@ -94,7 +94,6 @@ jobs:
           INSTANCE_NAME="webapp-instance-${{ github.sha }}"
           gcloud compute instances create "${INSTANCE_NAME}" \
             --source-instance-template="${INSTANCE_TEMPLATE_SELF_LINK}" \
-            --instance-template-region=${{ secrets.GCP_REGION }}
             --image="${IMAGE_ID}" \
             --image-project="${{ secrets.GCP_PROJECT_ID }}"
           NEW_INSTANCE_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates create-from-instance "${INSTANCE_NAME}" \
