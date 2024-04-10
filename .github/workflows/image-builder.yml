@@ -72,54 +72,65 @@ jobs:
 
       - name: Build AMI
         run: |
-          packer init gcp-centos.pkr.hcl
-          packer fmt gcp-centos.pkr.hcl
-          packer validate gcp-centos.pkr.hcl
-          PACKER_OUTPUT=$(packer build gcp-centos.pkr.hcl)
-          echo "$PACKER_OUTPUT"
+          packer init gcp-packer.pkr.hcl
+          packer fmt gcp-packer.pkr.hcl
+          packer validate gcp-packer.pkr.hcl
+          packer build -force gcp-packer.pkr.hcl
+          echo "Contents of manifest.json:"
+          cat manifest.json
+          IMAGE_ID=$(jq '.builds[0].artifact_id' manifest.json)
+          echo "IMAGE_ID is"
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_OUTPUT
+          echo $(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
 
-      # - name: Create new Instance Template with latest machine image
-      #   run: |
-      #     IMAGE_ID=$(packer build gcp-centos.pkr.hcl | grep -oE 'gce-sources: .*/images/(.*)-')
-      #     gcloud compute instance-templates create-with-new-machine-image my-instance-template \
-      #       --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
-      #       --metadata-from-file startup-script=setupCentOS.sh
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Create new Instance Template with latest machine image
+      - name: Get Terraform Outputs
         run: |
-          IMAGE_ID=$(echo "$PACKER_OUTPUT" | jq -r '.builds[-1].artifact_id' | cut -d'/' -f9)
-          echo "Image ID: $IMAGE_ID"
-          gcloud compute instance-templates create my-instance-template \
-            --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
-            --metadata-from-file startup-script=setupCentOS.sh
-
-      - name: Update Managed Instance Group with new Instance Template
+          INSTANCE_TEMPLATE_SELF_LINK=$(terraform output -raw instance_template_self_link)
+          INSTANCE_GROUP_MANAGER_INSTANCE_GROUP=$(terraform output -raw instance_group_manager_instance_group)
+ 
+      - name: Create New Instance Template Version
         run: |
-          gcloud compute instance-groups managed update my-managed-group \
-            --instance-template=my-instance-template \
+          IMAGE_ID=${{ steps.build_ami.outputs.IMAGE_ID }}
+          INSTANCE_NAME="webapp-instance-${{ github.sha }}"
+          gcloud compute instances create "${INSTANCE_NAME}" \
+            --source-instance-template="${INSTANCE_TEMPLATE_SELF_LINK}" \
+            --instance-template-region=${{ secrets.GCP_REGION }}
+            --image="${IMAGE_ID}" \
+            --image-project="${{ secrets.GCP_PROJECT_ID }}"
+          NEW_INSTANCE_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates create-from-instance "${INSTANCE_NAME}" \
+            --instance-template-name="webapp-template-${{ github.sha }}" \
+            --instance-template-project="${{ secrets.GCP_PROJECT_ID }}" \
+            --format='value(selfLink)')
+          gcloud compute instances delete "${INSTANCE_NAME}" --quiet
+ 
+      - name: Update Managed Instance Group
+        run: |
+          gcloud compute instance-groups managed set-instance-template "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
+            --template "${NEW_INSTANCE_TEMPLATE_SELF_LINK}" \
             --region=${{ secrets.GCP_REGION }}
-
-      - name: Start Rolling Update for Managed Instance Group
+ 
+      - name: Start Rolling Update
         run: |
-          gcloud compute instance-groups managed rolling-action start-update my-managed-group \
+          gcloud compute instance-groups managed rolling-action start-update "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
             --region=${{ secrets.GCP_REGION }} \
-            --max-unavailable=2 \
-            --min-ready=2
-
-      - name: Wait for Rolling Update to Complete
-        run: |
-          while true; do
-            STATUS=$(gcloud compute instance-groups managed describe my-managed-group \
-              --region=${{ secrets.GCP_REGION }} \
-              --format="get(status.statefulPercentComplete)")
-            if [ "$STATUS" == "100" ]; then
-              echo "Rolling update completed successfully."
-              break
-            else
-              echo "Rolling update in progress: $STATUS%"
-              sleep 30
-            fi
-          done
+            --max-unavailable "0" \
+            --min-ready "2"
+     
+            - name: Monitor Update
+            run: |
+              STATUS="ROLLING_OUT"
+              while [[ $STATUS == "ROLLING_OUT" ]]
+              do
+                STATUS=$(gcloud compute instance-groups managed describe "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
+                  --region=${{ secrets.GCP_REGION }} \
+                  --format='value(status)')
+                echo "Instance group is $STATUS"
+                sleep 10
+              done
+         
+              if [[ $STATUS == "ROLLED_OUT" ]]
+              then
+                exit 0
+              else
+                exit 1
+              fi
