@@ -75,7 +75,8 @@ jobs:
           packer init gcp-centos.pkr.hcl
           packer fmt gcp-centos.pkr.hcl
           packer validate gcp-centos.pkr.hcl
-          packer build gcp-centos.pkr.hcl
+          PACKER_OUTPUT=$(packer build gcp-centos.pkr.hcl)
+          echo "$PACKER_OUTPUT"
 
       # - name: Create new Instance Template with latest machine image
       #   run: |
@@ -89,8 +90,9 @@ jobs:
 
       - name: Create new Instance Template with latest machine image
         run: |
-          IMAGE_ID=$(packer build gcp-centos.pkr.hcl | jq -r '.builds[-1].artifact_id' | cut -d'/' -f9)
-          gcloud compute instance-templates create-with-new-machine-image my-instance-template \
+          IMAGE_ID=$(echo "$PACKER_OUTPUT" | jq -r '.builds[-1].artifact_id' | cut -d'/' -f9)
+          echo "Image ID: $IMAGE_ID"
+          gcloud compute instance-templates create my-instance-template \
             --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
             --metadata-from-file startup-script=setupCentOS.sh
 
