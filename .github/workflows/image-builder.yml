@@ -77,9 +77,19 @@ jobs:
           packer validate gcp-centos.pkr.hcl
           packer build gcp-centos.pkr.hcl
 
+      # - name: Create new Instance Template with latest machine image
+      #   run: |
+      #     IMAGE_ID=$(packer build gcp-centos.pkr.hcl | grep -oE 'gce-sources: .*/images/(.*)-')
+      #     gcloud compute instance-templates create-with-new-machine-image my-instance-template \
+      #       --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
+      #       --metadata-from-file startup-script=setupCentOS.sh
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Create new Instance Template with latest machine image
         run: |
-          IMAGE_ID=$(packer build gcp-centos.pkr.hcl | grep -oE 'gce-sources: .*/images/(.*)-')
+          IMAGE_ID=$(packer build gcp-centos.pkr.hcl | jq -r '.builds[-1].artifact_id' | cut -d'/' -f9)
           gcloud compute instance-templates create-with-new-machine-image my-instance-template \
             --machine-image="projects/${{ secrets.GCP_PROJECT_ID }}/global/images/${IMAGE_ID}" \
             --metadata-from-file startup-script=setupCentOS.sh
