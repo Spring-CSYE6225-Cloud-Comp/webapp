@@ -80,7 +80,7 @@ jobs:
           cat manifest.json
           IMAGE_ID=$(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
           echo "IMAGE_ID is"
-          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_OUTPUT
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
           echo $(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
 
       - name: Get Terraform Outputs
@@ -90,12 +90,13 @@ jobs:
  
       - name: Create New Instance Template Version
         run: |
-          IMAGE_ID=${{ steps.build_ami.outputs.IMAGE_ID }}
+          IMAGE_ID=${{ env.IMAGE_ID }}
           INSTANCE_NAME="webapp-instance-${{ github.sha }}"
           gcloud compute instances create "${INSTANCE_NAME}" \
             --source-instance-template="${INSTANCE_TEMPLATE_SELF_LINK}" \
             --image="${IMAGE_ID}" \
             --image-project="${{ secrets.GCP_PROJECT_ID }}"
+            --zone="${{ secrets.GCP_ZONE }}"
           NEW_INSTANCE_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates create-from-instance "${INSTANCE_NAME}" \
             --instance-template-name="webapp-template-${{ github.sha }}" \
             --instance-template-project="${{ secrets.GCP_PROJECT_ID }}" \
