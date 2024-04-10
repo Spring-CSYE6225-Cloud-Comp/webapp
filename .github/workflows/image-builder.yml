@@ -96,6 +96,7 @@ jobs:
             --source-instance-template="${INSTANCE_TEMPLATE_SELF_LINK}" \
             --image="${IMAGE_ID}" \
             --image-project="${{ secrets.GCP_PROJECT_ID }}"
+            --zone="${{ secrets.GCP_ZONE }}"
           NEW_INSTANCE_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates create-from-instance "${INSTANCE_NAME}" \
             --instance-template-name="webapp-template-${{ github.sha }}" \
             --instance-template-project="${{ secrets.GCP_PROJECT_ID }}" \
