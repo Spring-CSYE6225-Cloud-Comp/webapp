@@ -4,7 +4,7 @@ name: Build Image with Packer
 on:
   pull_request_target:
     branches:
-     - main
+     - demo
     types: [closed]
   # workflow_dispatch
  
@@ -75,62 +75,51 @@ jobs:
           packer init gcp-centos.pkr.hcl
           packer fmt gcp-centos.pkr.hcl
           packer validate gcp-centos.pkr.hcl
-          packer build -force gcp-centos.pkr.hcl
-          echo "Contents of manifest.json:"
-          cat manifest.json
-          IMAGE_ID=$(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
-          echo "IMAGE_ID is"
-          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
-          echo $(jq '.builds | map(select(.builder_type == "googlecompute")) | sort_by(.build_time) | last.artifact_id' manifest.json)
+          packer build gcp-centos.pkr.hcl
 
-      - name: Get Terraform Outputs
+      - name: GET GCP IMAGE ID
+        id: get_image_id
         run: |
-          INSTANCE_TEMPLATE_SELF_LINK=$(terraform output -raw instance_template_self_link)
-          INSTANCE_GROUP_MANAGER_INSTANCE_GROUP=$(terraform output -raw instance_group_manager_instance_group)
+          IMAGE_ID=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ":" -f2)
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
+          echo "Built GCP image ID is $IMAGE_ID"
+
+      # - name: Get Terraform Outputs
+      #   run: |
+      #     INSTANCE_TEMPLATE_SELF_LINK=$(terraform output -raw instance_template_self_link)
+      #     INSTANCE_GROUP_MANAGER_INSTANCE_GROUP=$(terraform output -raw instance_group_manager_instance_group)
  
-      - name: Create New Instance Template Version
+      - name: Generate version number
+        id: versioning
+        run: echo "VERSION=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Create New Instance Template
         run: |
-          IMAGE_ID=${{ env.IMAGE_ID }}
-          INSTANCE_NAME="webapp-instance-${{ github.sha }}"
-          gcloud compute instances create "${INSTANCE_NAME}" \
-            --source-instance-template="${INSTANCE_TEMPLATE_SELF_LINK}" \
-            --image="${IMAGE_ID}" \
-            --image-project="${{ secrets.GCP_PROJECT_ID }}"
-            --zone="${{ secrets.GCP_ZONE }}"
-          NEW_INSTANCE_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates create-from-instance "${INSTANCE_NAME}" \
-            --instance-template-name="webapp-template-${{ github.sha }}" \
-            --instance-template-project="${{ secrets.GCP_PROJECT_ID }}" \
-            --format='value(selfLink)')
-          gcloud compute instances delete "${INSTANCE_NAME}" --quiet
+          TEMPLATE_NAME="webapp-template-${{ env.VERSION }}
+          gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script=<<-EOT
+          #!/bin/bash
+          echo "Hello World!"
+          envFile=/opt/csye6225/Neha_Shende_002783740_05/.env
+          # Remove existing .env file
+          sudo rm -f "$envFile"
+          # Recreate .env file
+          sudo touch "$envFile"
+          # Populate .env file
+          echo "DB_NAME=${{secrets.DATABASE_NAME}}" | sudo tee -a "$envFile"
+          echo "DB_HOST=${{secrets.DATABASE_HOST}}" | sudo tee -a "$envFile"
+          echo "DB_USER=${{secrets.DATABASE_USER}}" | sudo tee -a "$envFile"
+          echo "DB_PASSWORD=${{secrets.DATABASE_PASSWORD}}" | sudo tee -a "$envFile"
+          echo "PORT='3306'" | sudo tee -a "$envFile"
+          echo "PUBSUB_VERIFY_EMAIL_TOPIC=${{secrets.DATABASE_PUBSUB}}" | sudo tee -a "$envFile"
+          sudo systemctl stop DBservice
+          sudo systemctl start DBservice
+          EOT
+          --quiet
  
       - name: Update Managed Instance Group
         run: |
-          gcloud compute instance-groups managed set-instance-template "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
-            --template "${NEW_INSTANCE_TEMPLATE_SELF_LINK}" \
-            --region=${{ secrets.GCP_REGION }}
- 
-      - name: Start Rolling Update
+          gcloud compute instance-groups managed rolling-action start-update webapp-instance-group --version=template=projects/${{ secrets.PROJECT_ID }}/regions/${{ secrets.REGION }}/instanceTemplates/my-template-${{ env.VERSION }} --region=${{ secrets.REGION }} --project=${{ secrets.PROJECT_ID }}
+       
+      - name: Monitor Update
         run: |
-          gcloud compute instance-groups managed rolling-action start-update "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
-            --region=${{ secrets.GCP_REGION }} \
-            --max-unavailable "0" \
-            --min-ready "2"
-     
-            - name: Monitor Update
-            run: |
-              STATUS="ROLLING_OUT"
-              while [[ $STATUS == "ROLLING_OUT" ]]
-              do
-                STATUS=$(gcloud compute instance-groups managed describe "${INSTANCE_GROUP_MANAGER_INSTANCE_GROUP}" \
-                  --region=${{ secrets.GCP_REGION }} \
-                  --format='value(status)')
-                echo "Instance group is $STATUS"
-                sleep 10
-              done
-         
-              if [[ $STATUS == "ROLLED_OUT" ]]
-              then
-                exit 0
-              else
-                exit 1
-              fi
+          gcloud compute instance-groups managed wait-until webapp-instance-group --version-target-reached --region ${{ secrets.REGION }}
