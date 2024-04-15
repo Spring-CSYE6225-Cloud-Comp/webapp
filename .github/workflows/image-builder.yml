@@ -4,9 +4,9 @@ name: Build Image with Packer
 on:
   pull_request_target:
     branches:
-     - demo
+     - main
     types: [closed]
-  workflow_dispatch:
+  # workflow_dispatch:
  
 
 jobs:
