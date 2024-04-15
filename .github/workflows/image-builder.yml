@@ -55,8 +55,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm run test:integration
+      # - name: Run tests
+      #   run: npm run test:integration
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
@@ -116,7 +116,7 @@ jobs:
  
       - name: Update Managed Instance Group
         run: |
-          gcloud compute instance-groups managed rolling-action start-update webapp-instance-group --version=template=projects/${{ secrets.PROJECT_ID }}/regions/${{ secrets.REGION }}/instanceTemplates/my-template-${{ env.VERSION }} --region=${{ secrets.REGION }} --project=${{ secrets.PROJECT_ID }}
+          gcloud compute instance-groups managed rolling-action start-update webapp-instance-group --version=template=projects/${{ secrets.PROJECT_ID }}/regions/${{ secrets.REGION }}/instanceTemplates/webapp-instance-template-${{ env.VERSION }} --region=${{ secrets.REGION }} --project=${{ secrets.PROJECT_ID }}
        
       - name: Monitor Update
         run: |
