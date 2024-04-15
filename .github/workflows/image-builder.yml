@@ -96,8 +96,7 @@ jobs:
       - name: Create New Instance Template
         run: |
           TEMPLATE_NAME="webapp-instance-template-${{ env.VERSION }}
-          gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script=<<-EOT
-          #!/bin/bash
+          gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script='#!/bin/bash
           echo "Hello World!"
           envFile=/opt/csye6225/Neha_Shende_002783740_05/.env
           # Remove existing .env file
@@ -113,8 +112,7 @@ jobs:
           echo "PUBSUB_VERIFY_EMAIL_TOPIC=${{secrets.DATABASE_PUBSUB}}" | sudo tee -a "$envFile"
           sudo systemctl stop DBservice
           sudo systemctl start DBservice
-          EOT
-          --quiet
+          ' --quiet
  
       - name: Update Managed Instance Group
         run: |
