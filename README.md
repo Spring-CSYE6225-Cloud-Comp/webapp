@@ -10,4 +10,3 @@
 - packer fmt .
 - packer validate
 
-- xyz
