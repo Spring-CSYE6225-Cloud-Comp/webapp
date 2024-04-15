@@ -95,7 +95,7 @@ jobs:
 
       - name: Create New Instance Template
         run: |
-          TEMPLATE_NAME="webapp-template-${{ env.VERSION }}
+          TEMPLATE_NAME="webapp-instance-template-${{ env.VERSION }}
           gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script=<<-EOT
           #!/bin/bash
           echo "Hello World!"
