@@ -37,7 +37,7 @@ describe('Account creation and updation integration test',()=>{
     console.log('trying to post')
     try{
       const createAccount = await chai.request(app)
-      .post('/v1/user')
+      .post('/v2/user')
       .send(reqBody);
       console.log('after post')
       //console.log(createAccount);
@@ -58,13 +58,13 @@ describe('Account creation and updation integration test',()=>{
     console.log('token=',verifyToken);
 
     const verifyEmailRes = await chai.request(app)
-    .get(`/v1/user/verify?token=${verifyToken}`);
+    .get(`/v2/user/verify?token=${verifyToken}`);
 
     expect(verifyEmailRes).to.have.status(200);
 
     console.log('verification successful');
     const getAccount = await chai.request(app)
-    .get('/v1/user/self')
+    .get('/v2/user/self')
     .set('Authorization',`Basic ${Buffer.from(`${reqBody.email}:${reqBody.password}`).toString('base64')}`);
 
     expect(getAccount).to.have.status(200);
@@ -100,7 +100,7 @@ describe('Account creation and updation integration test',()=>{
     console.log('trying to put');
     try{
     const updateAccount = await chai.request(app)
-    .put('/v1/user/self')
+    .put('/v2/user/self')
     .set('Authorization', `Basic ${Buffer.from(`${info.email}:${oldPwd}`).toString('base64')}`)
     .send(info);
 
@@ -112,7 +112,7 @@ describe('Account creation and updation integration test',()=>{
       console.log(error); 
     }
     const getAccount = await chai.request(app)
-    .get('/v1/user/self')
+    .get('/v2/user/self')
     .set('Authorization',`Basic ${Buffer.from(`${info.email}:${updated.password}`).toString('base64')}`);
 
     expect(getAccount).to.have.status(200);
