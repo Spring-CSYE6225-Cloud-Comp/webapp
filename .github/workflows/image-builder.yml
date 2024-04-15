@@ -55,8 +55,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # - name: Run tests
-      #   run: npm run test:integration
+      - name: Run tests
+        run: npm run test:integration
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
@@ -95,8 +95,8 @@ jobs:
 
       - name: Create New Instance Template
         run: |
-          TEMPLATE_NAME=webapp-instance-template-${{ env.VERSION }}
-          gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script='#!/bin/bash
+          TEMPLATE_NAME="webapp-instance-template-${{ env.VERSION }}"
+          gcloud compute instance-templates create $TEMPLATE_NAME --project=${{ secrets.PROJECT_ID }} --network=my-vpc --subnet=webapp --machine-type=${{ secrets.MACHINE_TYPE }} --boot-disk-auto-delete --instance-template-region=${{ secrets.REGION }} --region=${{ secrets.REGION }} --image=$IMAGE_ID --boot-disk-size=${{ secrets.BOOT_DISK_SIZE }} --boot-disk-type=pd-ssd --boot-disk-device-name=persistent-disk-0 --service-account=${{ secrets.SERVICEACCOUNT }} --scopes=${{ secrets.SCOPES }} --boot-disk-kms-key=${{ secrets.BOOT_DISK_KMS_KEY }} --metadata startup-script='#!/bin/bash
           echo "Hello World!"
           envFile=/opt/csye6225/Neha_Shende_002783740_05/.env
           # Remove existing .env file
@@ -113,7 +113,17 @@ jobs:
           sudo systemctl stop DBservice
           sudo systemctl start DBservice
           ' --quiet
- 
+          
+      - name: Configuring the managed instance group
+        run: |
+          REGION="${{ secrets.REGION }}"
+          MIG_GROUP_NAME="webapp-instance-group"
+          gcloud compute instance-groups managed set-instance-template \
+          $MIG_GROUP_NAME \
+          --template=projects/${{ secrets.PROJECT_ID }}/regions/${{ secrets.REGION }}/instanceTemplates/webapp-instance-template-${{ env.VERSION }} \
+          --region=${{ secrets.REGION }} \
+          --project=${{ secrets.PROJECT_ID }}
+     
       - name: Update Managed Instance Group
         run: |
           gcloud compute instance-groups managed rolling-action start-update webapp-instance-group --version=template=projects/${{ secrets.PROJECT_ID }}/regions/${{ secrets.REGION }}/instanceTemplates/webapp-instance-template-${{ env.VERSION }} --region=${{ secrets.REGION }} --project=${{ secrets.PROJECT_ID }}
@@ -121,3 +131,9 @@ jobs:
       - name: Monitor Update
         run: |
           gcloud compute instance-groups managed wait-until webapp-instance-group --version-target-reached --region ${{ secrets.REGION }}
+
+      - name: Checking the MIG to be stable
+        run: |
+          gcloud compute instance-groups managed wait-until webapp-instance-group \
+          --stable \
+          --region=${{ secrets.REGION }}    
